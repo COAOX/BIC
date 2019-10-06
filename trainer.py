@@ -70,10 +70,10 @@ class Trainer:
             correct += sum(pred == label).item()
             if(label in self.test_tol):
             	self.test_acc[label]+= sum(pred == label).item()
-            	self.test_tol[label] +=sum(1==1).item()
+            	self.test_tol[label] +=sum(label)
             else:
             	self.test_acc[label] = sum(pred == label).item()
-            	self.test_tol[label] = sum(1 == 1).item()
+            	self.test_tol[label] = sum(label).item()
             wrong += sum(pred != label).item()
         acc = correct / (wrong + correct)
         print("Test Acc: {}".format(acc*100))
