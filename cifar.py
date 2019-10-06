@@ -76,7 +76,11 @@ class Cifar100:
 
 def choice(i):
     reed = random.random()
-    n = 100**-(i*1.0/100.0)
+    #n = 100**-(i*1.0/100.0)
+    if i<50:
+        n=1.0
+    else:
+        n=0.4
     if reed<=n:
         return True
     return False

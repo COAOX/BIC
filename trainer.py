@@ -20,7 +20,7 @@ import json
 import pickle
 from dataset import BatchData
 from model import PreResNet, BiasLayer
-from cifar100 import Cifar100
+from cifar import Cifar100
 from exemplar import Exemplar
 from copy import deepcopy
 
@@ -28,11 +28,13 @@ from copy import deepcopy
 class Trainer:
     def __init__(self, total_cls):
         self.total_cls = total_cls
+        self.test_acc = {}
+        self.test_tol = {}
         self.seen_cls = 0
         self.dataset = Cifar100()
         self.model = PreResNet(32,total_cls).cuda()
         print(self.model)
-        self.model = nn.DataParallel(self.model, device_ids=[0,1])
+        self.model = nn.DataParallel(self.model, device_ids=[0])
         self.bias_layer1 = BiasLayer().cuda()
         self.bias_layer2 = BiasLayer().cuda()
         self.bias_layer3 = BiasLayer().cuda()
@@ -66,6 +68,12 @@ class Trainer:
             p = self.bias_forward(p)
             pred = p[:,:self.seen_cls].argmax(dim=-1)
             correct += sum(pred == label).item()
+            if(label in self.test_tol):
+            	self.test_acc[label]+= sum(pred == label).item()
+            	self.test_tol[label] +=sum(1==1).item()
+            else:
+            	self.test_acc[label] = sum(pred == label).item()
+            	self.test_tol[label] = sum(1 == 1).item()
             wrong += sum(pred != label).item()
         acc = correct / (wrong + correct)
         print("Test Acc: {}".format(acc*100))
