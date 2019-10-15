@@ -18,3 +18,6 @@ if __name__ == "__main__":
     showGod()
     trainer = Trainer(args.total_cls)
     trainer.train(args.batch_size, args.epoch, args.lr, args.max_size)
+
+
+

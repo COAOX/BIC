@@ -27,9 +27,9 @@ from copy import deepcopy
 
 class Trainer:
     def __init__(self, total_cls):
-        self.total_cls = total_cls
         self.test_acc = {}
         self.test_tol = {}
+        self.total_cls = total_cls
         self.seen_cls = 0
         self.dataset = Cifar100()
         self.model = PreResNet(32,total_cls).cuda()
@@ -57,6 +57,9 @@ class Trainer:
 
     def test(self, testdata):
         print("test data number : ",len(testdata))
+        for i in range(1,100):
+        	self.test_tol=0
+        	self.test_acc=0
         self.model.eval()
         count = 0
         correct = 0
@@ -68,16 +71,22 @@ class Trainer:
             p = self.bias_forward(p)
             pred = p[:,:self.seen_cls].argmax(dim=-1)
             correct += sum(pred == label).item()
-            if(label in self.test_tol):
-            	self.test_acc[label]+= sum(pred == label).item()
-            	self.test_tol[label] +=sum(label)
-            else:
-            	self.test_acc[label] = sum(pred == label).item()
-            	self.test_tol[label] = sum(label).item()
             wrong += sum(pred != label).item()
+            for _,(la,pr) in enumerate(zip(label,pred)):
+                a = int(la.item())
+                b = int(pr.item())
+                self.test_tol[la.item()]+=1
+                #print(la.item())
+                #print(self.test_acc[label[i]])
+                #t = la==pr?1:0
+                if a==b:
+                    self.test_acc[la.item()]+=1
         acc = correct / (wrong + correct)
         print("Test Acc: {}".format(acc*100))
         self.model.train()
+        for i in range(1,100):
+            if not self.test_tol[i]==0:
+                print("{}:{}".format(i,100*(self.test_acc[i]/self.test_tol[i])))
         print("---------------------------------------------")
         return acc
 
@@ -127,6 +136,7 @@ class Trainer:
             train, val, test = dataset.getNextClasses(inc_i)
             print(len(train), len(val), len(test))
             train_x, train_y = zip(*train)
+            print(train_y);
             val_x, val_y = zip(*val)
             test_x, test_y = zip(*test)
             test_xs.extend(test_x)
