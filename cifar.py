@@ -23,8 +23,7 @@ class Cifar100:
         train_groups = [[],[],[],[],[]]
         for train_data, train_label in zip(self.train_data, self.train_labels):
             # print(train_data.shape)
-            if not choice(train_label):
-                continue
+            
             train_data_r = train_data[:1024].reshape(32, 32)
             train_data_g = train_data[1024:2048].reshape(32, 32)
             train_data_b = train_data[2048:].reshape(32, 32)
@@ -74,16 +73,7 @@ class Cifar100:
     def getNextClasses(self, i):
         return self.train_groups[i], self.val_groups[i], self.test_groups[i]
 
-def choice(i):
-    reed = random.random()
-    n = 100**-(i*1.0/100.0)
-    #if i<50:
-        #n=1.0
-    #else:
-        #n=0.4
-    if reed<=n:
-        return True
-    return False
+
 
 if __name__ == "__main__":
     cifar = Cifar100()

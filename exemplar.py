@@ -27,9 +27,6 @@ class Exemplar:
             else:
                 if len(self.val[y]) < val_store_num:
                     self.val[y].append(x)
-        assert self.cur_cls == len(list(self.val.keys()))
-        for key, value in self.val.items():
-            assert len(self.val[key]) == val_store_num
 
         for x, y in zip(train_x, train_y):
             if y not in self.train:
@@ -37,9 +34,6 @@ class Exemplar:
             else:
                 if len(self.train[y]) < train_store_num:
                     self.train[y].append(x)
-        assert self.cur_cls == len(list(self.train.keys()))
-        for key, value in self.train.items():
-            assert len(self.train[key]) == train_store_num
 
     def get_exemplar_train(self):
         exemplar_train_x = []

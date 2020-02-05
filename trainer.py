@@ -1,3 +1,4 @@
+
 import torch
 import torchvision
 from torchvision.models import vgg16
@@ -27,8 +28,6 @@ from copy import deepcopy
 
 class Trainer:
     def __init__(self, total_cls):
-        self.test_acc = {}
-        self.test_tol = {}
         self.total_cls = total_cls
         self.seen_cls = 0
         self.dataset = Cifar100()
@@ -57,13 +56,15 @@ class Trainer:
 
     def test(self, testdata):
         print("test data number : ",len(testdata))
-        for i in range(1,100):
-        	self.test_tol=0
-        	self.test_acc=0
         self.model.eval()
         count = 0
         correct = 0
         wrong = 0
+        test_acc = {}
+        test_tot = {}
+        for i  in range(100):
+            test_acc[i] = 0
+            test_tot[i] = 0
         for i, (image, label) in enumerate(testdata):
             image = image.cuda()
             label = label.view(-1).cuda()
@@ -72,21 +73,18 @@ class Trainer:
             pred = p[:,:self.seen_cls].argmax(dim=-1)
             correct += sum(pred == label).item()
             wrong += sum(pred != label).item()
-            for _,(la,pr) in enumerate(zip(label,pred)):
-                a = int(la.item())
-                b = int(pr.item())
-                self.test_tol[la.item()]+=1
-                #print(la.item())
-                #print(self.test_acc[label[i]])
-                #t = la==pr?1:0
-                if a==b:
-                    self.test_acc[la.item()]+=1
+            for (la,prd) in zip(label.cpu().numpy(),pred.cpu().numpy()):
+                test_tot[la] = test_tot[la]+1
+                if la == prd:
+                    test_acc[la] = test_acc[la]+1
         acc = correct / (wrong + correct)
         print("Test Acc: {}".format(acc*100))
+        print("############################################")
+        for i in range(100):
+            if not test_tot[i]==0:
+                print(f"class {i}:{test_acc[i]/test_tot[i]}-tot:{test_tot[i]}")
+        print("############################################")
         self.model.train()
-        for i in range(1,100):
-            if not self.test_tol[i]==0:
-                print("{}:{}".format(i,100*(self.test_acc[i]/self.test_tol[i])))
         print("---------------------------------------------")
         return acc
 
@@ -117,6 +115,9 @@ class Trainer:
         for param_group in optimizer.param_groups:
             return param_group['lr']
 
+
+
+
     def train(self, batch_size, epoches, lr, max_size):
         total_cls = self.total_cls
         criterion = nn.CrossEntropyLoss()
@@ -134,14 +135,17 @@ class Trainer:
         for inc_i in range(dataset.batch_num):
             print(f"Incremental num : {inc_i}")
             train, val, test = dataset.getNextClasses(inc_i)
-            print(len(train), len(val), len(test))
             train_x, train_y = zip(*train)
-            print(train_y);
             val_x, val_y = zip(*val)
             test_x, test_y = zip(*test)
+            #print(f"train:{train_y}")
+            train_y_hot = dense_to_one_hot(train_y,100)
+            val_y = dense_to_one_hot(val_y,100)
+            test_y = dense_to_one_hot(test_y,100)
             test_xs.extend(test_x)
             test_ys.extend(test_y)
 
+            #print(f"train_y:{train_y} ,val_y:{val_y}, test_y:{test_y}")
             train_xs, train_ys = exemplar.get_exemplar_train()
             train_xs.extend(train_x)
             train_xs.extend(val_x)
@@ -287,3 +291,16 @@ class Trainer:
             optimizer.step()
             losses.append(loss.item())
         print("stage2 loss :", np.mean(losses))
+
+
+def dense_to_one_hot(labels_dense, num_classes):
+    """Convert class labels from scalars to one-hot vectors."""
+    #label_dense = torch.LongTensor(np.array([labels_dense],dtype=float).T)
+    #label_dense = torch.LongTensor(len(labels_dense),1).random_()%num_classes
+    #label_dense = label_dense.transpose(1,0)
+    #print(f"label_dense: {label_dense}")
+    #y_onehot = torch.FloatTensor(len(label_dense), num_classes)
+    #y_onehot.zero_()
+    #y_onehot.scatter_(1, label_dense, 1)
+    #print(f"onehot: {y_onehot}")
+    return labels_dense
