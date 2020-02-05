@@ -10,7 +10,7 @@ res_data = []
 res_labels = []
 for train_d, train_l in zip(train_data, train_labels):
 	if not choice(train_label):
-        continue
+		continue
     res_data.append(train_d)
     res_labels.append(train_l)
 train['data'] = res_data
