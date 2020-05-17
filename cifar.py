@@ -2,10 +2,13 @@ import pickle
 import numpy as np
 import os
 import random
-
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--Data_file',default = 'train_meta', type = str)
+args=parser.parse_args()
 class Cifar100:
     def __init__(self):
-        with open('cifar100/train','rb') as f:
+        with open('cifar100/{}'.format(args.Data_file),'rb') as f:
             self.train = pickle.load(f, encoding='latin1')
         with open('cifar100/test','rb') as f:
             self.test = pickle.load(f, encoding='latin1')
@@ -62,12 +65,6 @@ class Cifar100:
                 test_groups[3].append((test_data,test_label))
             elif 80 <= test_label < 100:
                 test_groups[4].append((test_data,test_label))
-        assert len(test_groups[0]) == 2000
-        assert len(test_groups[1]) == 2000
-        assert len(test_groups[2]) == 2000
-        assert len(test_groups[3]) == 2000
-        assert len(test_groups[4]) == 2000
-
         return train_groups, val_groups, test_groups
 
     def getNextClasses(self, i):
