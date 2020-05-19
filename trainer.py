@@ -32,7 +32,6 @@ class Trainer:
         self.seen_cls = 0
         self.dataset = Cifar100()
         self.model = PreResNet(32,total_cls).cuda()
-        print(self.model)
         self.model = nn.DataParallel(self.model, device_ids=[0])
         self.bias_layer1 = BiasLayer().cuda()
         self.bias_layer2 = BiasLayer().cuda()
@@ -79,13 +78,7 @@ class Trainer:
                     test_acc[la] = test_acc[la]+1
         acc = correct / (wrong + correct)
         print("Test Acc: {}".format(acc*100))
-        print("############################################")
-        for i in range(100):
-            if not test_tot[i]==0:
-                print(f"class {i}:{test_acc[i]/test_tot[i]}-tot:{test_tot[i]}")
-        print("############################################")
         self.model.train()
-        print("---------------------------------------------")
         return acc
 
 
