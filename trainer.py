@@ -139,13 +139,12 @@ class Trainer:
             test_ys.extend(test_y)
 
             #print(f"train_y:{train_y} ,val_y:{val_y}, test_y:{test_y}")
-            train_xs, train_ys = exemplar.get_exemplar_train()
             train_xs.extend(train_x)
             train_xs.extend(val_x)
             train_ys.extend(train_y)
             train_ys.extend(val_y)
 
-
+            print(train_xs.size())
             train_data = DataLoader(BatchData(train_xs, train_ys, self.input_transform),
                         batch_size=batch_size, shuffle=True, drop_last=True)
             val_data = DataLoader(BatchData(val_x, val_y, self.input_transform_eval),
